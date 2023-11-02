@@ -13,7 +13,7 @@ int **criaMatriz() {
     return matriz;
 }
 int **prencheMatriz() {
-    //Preenche uma matriz vazia com dígitos de 1 a 8, e o 27 no final.
+    //Preenche uma matriz vazia com dígitos de 1 a 8, e o 0 no final.
     int **matriz = criaMatriz();
     int i, j, k = 1;
     for(i = 0; i < tam; i++) {
