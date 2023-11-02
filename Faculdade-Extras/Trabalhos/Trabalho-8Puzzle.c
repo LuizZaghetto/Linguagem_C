@@ -65,7 +65,6 @@ int main() {
     int **matrizona;
     matrizona = criaMatriz();
     matrizona = prencheMatriz();
-    cima(matrizona);
     printaMatriz(matrizona);
 
 
