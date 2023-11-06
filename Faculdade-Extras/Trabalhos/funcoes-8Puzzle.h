@@ -11,6 +11,8 @@ int **criaMatriz() {
     }
     return matriz;
 }
+
+
 int **prencheMatriz() {
     //Preenche uma matriz vazia com dígitos de 1 a 8, e o 0 no final.
     int **matriz = criaMatriz();
@@ -25,6 +27,8 @@ int **prencheMatriz() {
     matriz[2][2] = 0;
     return matriz;
 }
+
+
 int **criaAleatoria() {
     int **matrizrandom = criaMatriz();
     matrizrandom = prencheMatriz();
@@ -44,16 +48,20 @@ int **criaAleatoria() {
 	}
     return matrizrandom;
 }
+
+
 void printaMatriz(int **matriz) {
     // Percorre todos os elementos da matriz e printa eles.
     int i, j;
     for(i = 0; i < tam; i++) {
         for(j = 0; j < tam; j++) {
-            printf("%d ", matriz[i][j]);
+            printf("\t[%d] ", matriz[i][j]);
         }
-        printf("\n");
+        printf("\n\n");
     }
-} 
+}
+
+
 void verificaCerto(int **matriz) {
     int i, j, k = 1;
     //A matriz inteira será percorrida com o objetivo de verificar se cada elemento está colocado corretamente.
@@ -77,29 +85,21 @@ void verificaCerto(int **matriz) {
         }
     }
 }
+
+
 int verificaCertoDiscreta(int **matriz) {
-    int i, j, k = 1, soma = 0;
-    //A matriz inteira será percorrida com o objetivo de verificar se cada elemento está colocado corretamente.
-    for(i = 0; i < tam; i++) {
-        for(j = 0; j < tam; j++) {
-            //Para evitarmos problemas no elemento final, será feito uma verificação específica para ele.
-            if((i == 2) && (j == 2)) {
-                if(matriz[i][j] != 0) {
-                    soma++;
-                    continue;
-                }
-                // O continue é colocado em ambos os casos para que não haja uma dupla verificação.
-                else{
-                    continue;
-                }
+	int i, j, cont = 0;
+	for (i = 0; i <= 2; i++) {
+	    for(j = 0; j <=2; j++) {
+	        if(matriz[i][j] != 3*i + (j+1)) {
+		        cont++;  
             }
-            if(matriz[i][j] != k) {
-                soma++;
-            }
-            k++;
         }
+}
+    if(matriz[2][2] == 0) {
+                    cont--;
     }
-    return soma;
+    return cont;
 }
 int** cima(int **matriz)
 	{
@@ -123,7 +123,7 @@ int** cima(int **matriz)
 int** baixo(int **matriz) {
     int vazio = 0;
     int aux, i, j;
-    
+
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
             if (matriz[i][j] == vazio) {
@@ -132,13 +132,15 @@ int** baixo(int **matriz) {
                     aux = matriz[i + 1][j];
                     matriz[i + 1][j] = matriz[i][j];
                     matriz[i][j] = aux;
-                    printaMatriz(matriz);
+                    return matriz;
                 }
             }
         }
     }
     return matriz;
 }
+
+
 int** esquerda(int **matriz) {
 	int vazio = 0;
 	int aux, i, j;
@@ -150,20 +152,22 @@ int** esquerda(int **matriz) {
                     matriz[i][j-1] = matriz[i][j];
                     matriz[i][j] = aux;
 			    }
-		    }       
+		    }
 	    }
-	}   
+	}
     return matriz;
 }
+
+
 int** direita(int **matriz){
 		int vazio = 0;
 		int aux, i, j;
 		for(i = 0; i < 3; i++){
-			
+
             for(j = 0; j < 3; j++){
-		
+
                 if(matriz[i][j] == vazio){
-			
+
                     if( j <= 1){
 				        aux = matriz[i][j+1];
 				        matriz[i][j+1] = matriz[i][j];
@@ -175,6 +179,7 @@ int** direita(int **matriz){
 	    }
     return matriz;
 }
+
 
 int **opcoes(int **matriz,char movimento) {
     if(movimento == 'c') {
@@ -189,39 +194,47 @@ int **opcoes(int **matriz,char movimento) {
     if(movimento == 'd') {
         matriz = direita(matriz);
     }
+    else{
+        printf("O valor digitado é inválido.\n\n");
+    }
     return matriz;
 }
+
 
 void jogar() {
     int **matrizDoJogo = criaAleatoria();
     int **matrizPerfeita = prencheMatriz();
-    printf("Sua matriz inicial é : \n");
-    printaMatriz(matrizDoJogo);    
-    printf("Sua meta é : \n");
+    printf("==> Sua meta é: \n");
     printaMatriz(matrizPerfeita);
+    printf("\n\n");
+		printf("==> Sua matriz inicial é: \n");
+    printaMatriz(matrizDoJogo);
     while(1) {
         char direcao, continuar;
-        printf("Digite seu próximo movimento(cima = c, baixo = b, esquerda = e, direita = d): ");
+        printf("==> Digite seu próximo movimento(cima = c, baixo = b, esquerda = e, direita = d):\n");
         scanf(" %c", &direcao);
         matrizDoJogo = opcoes(matrizDoJogo, direcao);
         printaMatriz(matrizDoJogo);
         if(verificaCertoDiscreta(matrizDoJogo) == 0) {
-            printf("Parabéns, você ganhou!\n");
+            printf("\n\nParabéns, você ganhou!\n\n");
             break;
         }
         else{
-            printf("Você ainda não ganhou, existem %d números fora do lugar.\n", verificaCertoDiscreta(matrizDoJogo));
+            printf("\n\nVocê ainda não ganhou, existem %d números fora do lugar.\n\n", verificaCertoDiscreta(matrizDoJogo));
         }
-        printf("Deseja continuar jogando(S ou N)? ");
+        printf("***Deseja continuar jogando(S ou N)?\n");
         scanf(" %c", &continuar);
         if(continuar == 'S' || continuar == 's') {
             continue;
         }
-        if(continuar == 'N' || continuar == 'n') {
+        else
+				{
+					if(continuar == 'N' || continuar == 'n') {
             break;
         }
+				}
+
     }
-    printf("Sua matriz final é : \n");
+    printf("***Sua matriz final é: \n");
     printaMatriz(matrizDoJogo);
 }
-

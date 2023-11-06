@@ -26,8 +26,15 @@ Lista* insereOrdenando(Lista* listinha, int valor) {
         novo->prox = aux;
         return novo;
     }
-
+    if(aux->info == valor) {
+    printf("O valor %d já existe na lista.\n", valor);
+    return listinha;
+    }
     while (aux != NULL && aux->info < valor) {
+        if((aux->prox !=NULL && aux->prox->info == valor) || aux->info == valor) {
+            printf("O valor %d já existe na lista.\n", valor);
+            return listinha;
+        }
         ant = aux;
         aux = aux->prox;
     }
@@ -49,9 +56,14 @@ void imprimeLista(Lista* listinha) {
 int main() {
     Lista *p;
     p = inicializa();
-    p = insereOrdenando(p, 10);
+    p = insereOrdenando(p, 1);
     p = insereOrdenando(p, 8);
     p = insereOrdenando(p, 15);
+    p = insereOrdenando(p, 15);
+    p = insereOrdenando(p, 1);
+    p = insereOrdenando(p, 1200);
+    p = insereOrdenando(p, 1200);
+    p = insereOrdenando(p, 1);
     p = insereOrdenando(p, 1);
     imprimeLista(p);
 }
