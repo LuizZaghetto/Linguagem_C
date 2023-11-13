@@ -2,6 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+int** cima(int **matriz);
+int** baixo(int **matriz);
+int** esquerda(int **matriz);
+int** direita(int **matriz);
+
 int **criaMatriz() {
     //Cria primeiro as 3 linhas da matriz, porém, elas estão vazias.
     int **matriz = (int **)malloc(tam * sizeof(int));
@@ -28,24 +34,30 @@ int **prencheMatriz() {
     return matriz;
 }
 
-
 int **criaAleatoria() {
     int **matrizrandom = criaMatriz();
     matrizrandom = prencheMatriz();
-    int i, j, r, s, aux;
-		srand(time(NULL));
-
-	for(i = 0; i < 3; i++)
-	{
-		for(j = 0; j < 3; j++)
-		{
-			r = rand() % 3; //aqui ele está gerando um número aleatório entre 1 e 3
-			s = rand() % 3;
-			aux = matrizrandom[i][j]; //aqui ele atribui à aux a matriz que pré definimos
-			matrizrandom[i][j] = matrizrandom[r][s]; //aqui ele vai embaralhar os índice dos dois vetores da matriz, i & j (substitui os valores do indice pelos numeros aleatórios)
-			matrizrandom[r][s] = aux; //e vai atribuir a matriz embaralhada ao aux e volta com o indice normal
-		}
-	}
+    int i;
+    srand(time(NULL));
+for (int i = 0; i < 100; i++) {
+        int numeroAleatorio = rand() % 4 + 1;
+        switch (numeroAleatorio) {
+            case 1:
+                matrizrandom = cima(matrizrandom);
+                break;
+            case 2:
+                matrizrandom = baixo(matrizrandom);
+                break;
+            case 3:
+                matrizrandom = esquerda(matrizrandom);
+                break;
+            case 4:
+                matrizrandom = direita(matrizrandom);
+                break;
+            default:
+                break;
+        }
+    }
     return matrizrandom;
 }
 
@@ -92,7 +104,7 @@ int verificaCertoDiscreta(int **matriz) {
 	for (i = 0; i <= 2; i++) {
 	    for(j = 0; j <=2; j++) {
 	        if(matriz[i][j] != 3*i + (j+1)) {
-		        cont++;  
+		        cont++;
             }
         }
 }
@@ -182,25 +194,26 @@ int** direita(int **matriz){
 
 
 int **opcoes(int **matriz,char movimento) {
-    if(movimento == 'c') {
+    switch (movimento){
+    case ('c') :
         matriz = cima(matriz);
-    }
-    if(movimento == 'b') {
+        break;
+    case ('b') :
         matriz = baixo(matriz);
-    }
-    if(movimento == 'e') {
+        break;
+    case ('e') :
         matriz = esquerda(matriz);
-    }
-    if(movimento == 'd') {
+        break;
+    case ('d') :
         matriz = direita(matriz);
-    }
-    else{
-        printf("O valor digitado é inválido.\n\n");
+        break;
+    default :
+        printf("O valor digitado é inválido");
+
     }
     return matriz;
+
 }
-
-
 void jogar() {
     int **matrizDoJogo = criaAleatoria();
     int **matrizPerfeita = prencheMatriz();
@@ -222,19 +235,11 @@ void jogar() {
         else{
             printf("\n\nVocê ainda não ganhou, existem %d números fora do lugar.\n\n", verificaCertoDiscreta(matrizDoJogo));
         }
-        printf("***Deseja continuar jogando(S ou N)?\n");
-        scanf(" %c", &continuar);
-        if(continuar == 'S' || continuar == 's') {
-            continue;
-        }
-        else
-				{
-					if(continuar == 'N' || continuar == 'n') {
-            break;
-        }
-				}
 
     }
     printf("***Sua matriz final é: \n");
     printaMatriz(matrizDoJogo);
+
+    free(matrizDoJogo);
+    free(matrizPerfeita);
 }

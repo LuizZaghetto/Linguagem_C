@@ -51,7 +51,7 @@ void imprime(Pilha* pilhinha) {
 }
 int apagaTopo(Pilha* pilhinha) {
     int dado;
-    No *apagado = (No *)malloc(sizeof(No));
+    No *apagado;
     apagado = pilhinha->topo;
     dado = pilhinha->topo->info;
     pilhinha->topo = apagado->prox;
