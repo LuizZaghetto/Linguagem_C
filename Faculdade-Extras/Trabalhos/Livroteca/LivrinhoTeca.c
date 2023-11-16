@@ -179,40 +179,67 @@ Cliente* insereClienteOrdenando(Cliente* clientinho, int valorCodigo, char nomeC
     ant->prox = novo;
     return clientinho;
 }
-Cliente* insereLivroClienteOrdenando(Cliente* clientinho,int valorCodigo, int codigoCliente, char nomeCliente[], char nomeLivro[], char assuntoLivro[], char autorLivro[]) {
-        LivroDisp *aux, *ant = NULL;
-        aux = clientinho->listaLivros;
+Cliente* insereLivroClienteOrdenando(Cliente* clientinho, LivroDisp* livrinhoDisp, char nomeLivro[], char nomeCliente[]) {
+    LivroDisp *aux;
+    aux = livrinhoDisp;
+    Cliente* auxManos;
+    auxManos = clientinho;
+    clientinho->listaLivros = inicializaLivroDisp();
 
-        LivroDisp *novo = criaLivroDisp();
-        novo->codigo = valorCodigo;
-        strcpy(novo->nome, nomeLivro);
-        strcpy(novo->assunto, assuntoLivro);
-        strcpy(novo->autor, autorLivro);
+    while(aux != NULL) {
+        if(strcmp(aux->nome, nomeLivro) == 0){
+            break;
+        }
+        aux = aux->prox;
+    }
+    if(aux == NULL) {
+        printf("O livro não foi encontrado para empréstimo");
+        return NULL;
+    }
+    while(auxManos != NULL && strcmp(auxManos->nome, nomeCliente) != 0) {
+        auxManos = auxManos->prox;
+    }
+    if(auxManos == NULL) {
+        printf("O cliente não existe");
+        return NULL;
+    }
+    LivroDisp *auxCliente, *antCliente = NULL;
+    auxCliente = auxManos->listaLivros;
+    
+    LivroDisp *novo = criaLivroDisp();
+    novo->codigo = aux->codigo;
+    strcpy(novo->nome, aux->nome);
+    strcpy(novo->assunto, aux->assunto);
+    strcpy(novo->autor, aux->autor);
 
-        if (aux == NULL || aux->codigo > valorCodigo) {
-            novo->prox = aux;
-            clientinho->listaLivros = novo;
+    if (auxCliente == NULL || auxCliente->codigo > novo->codigo) {
+        novo->prox = auxCliente;
+        auxManos->listaLivros = novo;
+        return clientinho;
+    }
+    if(auxCliente->codigo == novo->codigo) {
+    printf("O cliente %s já está com o livro %s.\n", nomeCliente, nomeLivro);
+    free(novo);
+    return clientinho;
+    }
+
+    while (auxCliente != NULL && novo->codigo < auxCliente->codigo) {
+        if((auxCliente->prox !=NULL && auxCliente->prox->codigo == novo->codigo) || novo->codigo == auxCliente->codigo) {
+            printf("O cliente %s já está com o livro %s.\n", nomeCliente, nomeLivro);
+            free(novo);
             return clientinho;
         }
-        if(aux->codigo == valorCodigo) {
-        printf("O valor %d já existe na LivroEmpres.\n", valorCodigo);
-        free(novo);
-        return clientinho;
-        }
+        antCliente = auxCliente;
+        auxCliente = auxCliente->prox;
+    }
 
-        while (aux != NULL && aux->codigo < valorCodigo) {
-            if((aux->prox !=NULL && aux->prox->codigo == valorCodigo) || aux->codigo == valorCodigo) {
-                printf("O valor %d já existe na LivroEmpres.\n", valorCodigo);
-                free(novo);
-                return clientinho;
-            }
-            ant = aux;
-            aux = aux->prox;
-        }
-
-        novo->prox = aux;
-        ant->prox = novo;
-        return clientinho;
+    novo->prox = auxCliente;
+    if (antCliente == NULL) {
+        auxManos->listaLivros = novo;
+    } else {
+        antCliente->prox = novo;
+    }
+    return clientinho;
 }
 void imprimeCliente(Cliente* clientinho) {
     Cliente *aux;
@@ -267,9 +294,10 @@ void imprimeGeral(Cliente* clientinho) {
         aux = aux->prox;
     }
 }
-void emprestaLivro(char nomeLivro[], char nomeCliente[], LivroDisp* livrinhoDisp, LivroEmpres** livrinhoEmpres, Cliente** clientinho) {
-    LivroDisp *aux, *ant;
-    Cliente **auxCliente;
+
+LivroDisp* emprestaLivro(char nomeLivro[], char nomeCliente[], LivroDisp* livrinhoDisp, LivroEmpres** livrinhoEmpres, Cliente* clientinho) {
+    LivroDisp *aux, *ant = NULL;
+    Cliente *auxCliente;
     aux = livrinhoDisp;
     auxCliente = clientinho;
 
@@ -279,17 +307,17 @@ void emprestaLivro(char nomeLivro[], char nomeCliente[], LivroDisp* livrinhoDisp
     }
     if(aux == NULL) {
         printf("O livro não foi encontrado para empréstimo.\n");
-        return;
+        return NULL;
     }
-    while(*auxCliente != NULL && strcmp(nomeCliente, (*auxCliente)->nome) != 0) {
-        (*auxCliente) = (*auxCliente)->prox;
+    while(auxCliente != NULL && strcmp(nomeCliente, auxCliente->nome) != 0) {
+        auxCliente = auxCliente->prox;
     }
-    if(*auxCliente == NULL) {
+    if(auxCliente == NULL) {
         printf("O cliente não foi encontrado");
-        return;
+        return NULL;
     }
-    *livrinhoEmpres = insereLivroEmpresOrdenando(*livrinhoEmpres, aux->codigo, (*auxCliente)->codigo, aux->nome, aux->assunto, aux->autor);
-    *clientinho = insereLivroClienteOrdenando(*clientinho, aux->codigo, (*auxCliente)->codigo, nomeCliente, nomeLivro, aux->assunto, aux->autor);
+    *livrinhoEmpres = insereLivroEmpresOrdenando(*livrinhoEmpres, aux->codigo, auxCliente->codigo, aux->nome, aux->assunto, aux->autor);
+    clientinho = insereLivroClienteOrdenando(clientinho, livrinhoDisp, nomeLivro, nomeCliente);
     if(ant == NULL) {
         livrinhoDisp = aux->prox;
     }
@@ -297,13 +325,13 @@ void emprestaLivro(char nomeLivro[], char nomeCliente[], LivroDisp* livrinhoDisp
         ant->prox = aux->prox;
     }
     free(aux);
+    return livrinhoDisp;
 }
-
 int main() {
     LivroDisp *p;
     p = inicializaLivroDisp();
     p = insereLivroDispOrdenando(p, 1, "Mágico de Oz", "Fantasia", "L. Frank Baum");
-    p = insereLivroDispOrdenando(p, 2, "Senhor dos anéis", "Fantasia", "Tolkien");
+    p = insereLivroDispOrdenando(p, 2, "Senhor dos Anéis", "Fantasia", "Tolkien");
     p = insereLivroDispOrdenando(p, 3, "1984", "Ficção Científica", "George Orwell");
     p = insereLivroDispOrdenando(p, 4, "A Revolução dos Bichos", "Fábula Política", "George Orwell");
     p = insereLivroDispOrdenando(p, 5, "O Pequeno Príncipe", "Fábula", "Antoine de Saint-Exupéry");
@@ -315,11 +343,17 @@ int main() {
     Cliente *c;
     c = inicializaCliente();
     c = insereClienteOrdenando(c, 5, "Cleiton");
-    c = insereClienteOrdenando(c, 3, "Robinson");
+    c = insereClienteOrdenando(c, 3, "Ryan");
     c = insereClienteOrdenando(c, 9, "Oláberto");
     c = insereClienteOrdenando(c, 10, "Umbrenildo");
     c = insereClienteOrdenando(c, 7, "Habernaldo");
-    c = insereClienteOrdenando(c, 4, "John");
+    c = insereClienteOrdenando(c, 4, "Patrício Patêhomem");
 
-    emprestaLivro("1984", "John", p, &e, &c);
+    p = emprestaLivro("A Revolução dos Bichos", "Oláberto", p, &e, c);
+    p = emprestaLivro("Mágico de Oz", "Habernaldo", p, &e, c);
+    p = emprestaLivro("1984", "Cleiton", p, &e, c);
+    p = emprestaLivro("1984", "Cleiton", p, &e, c);
+    p = emprestaLivro("O Pequeno Príncipe", "Ryan", p, &e, c);
+    p = emprestaLivro("Dom Quixote", "Umbrenildo", p, &e, c);
+    imprimeClienteLivro(c, "Ryan");
 }
