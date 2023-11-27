@@ -87,25 +87,19 @@ LivroDisp* DigitaLivroDispOrdenando(LivroDisp* livrinhoDisp) {
     printf("Digite o código do livro: ");
     scanf("%d", &(novo->codigoLivro));
     getchar();
-
-    printf("Digite o nome do livro: ");
-    fgets(novo->nome, sizeof(novo->nome), stdin);
-    novo->nome[strcspn(novo->nome, "\n")] = '\0';
-
-    printf("Digite o assunto do livro: ");
-    fgets(novo->assunto, sizeof(novo->assunto), stdin);
-    novo->assunto[strcspn(novo->assunto, "\n")] = '\0';
-
-    printf("Digite o nome do autor do livro: ");
-    fgets(novo->autor, sizeof(novo->autor), stdin);
-    novo->autor[strcspn(novo->autor, "\n")] = '\0';
-
-    while (aux != NULL) {
+    while(aux != NULL) {
         if(aux->codigoLivro == novo->codigoLivro) {
             printf("O código %d já foi usado, ele pertence ao livro %s.\n", novo->codigoLivro, aux->nome);
             free(novo);
             return livrinhoDisp;
         }
+        aux = aux->prox;
+    }
+    aux = livrinhoDisp;
+    printf("Digite o nome do livro: ");
+    fgets(novo->nome, sizeof(novo->nome), stdin);
+    novo->nome[strcspn(novo->nome, "\n")] = '\0';
+    while(aux != NULL) {
         if (strcasecmp(novo->nome, aux->nome) == 0) {
             printf("Um livro com o nome %s já existe, ele tem o código %d\n", novo->nome, aux->codigoLivro);
             free(novo);
@@ -113,6 +107,13 @@ LivroDisp* DigitaLivroDispOrdenando(LivroDisp* livrinhoDisp) {
         }
         aux = aux->prox;
     }
+    printf("Digite o assunto do livro: ");
+    fgets(novo->assunto, sizeof(novo->assunto), stdin);
+    novo->assunto[strcspn(novo->assunto, "\n")] = '\0';
+
+    printf("Digite o nome do autor do livro: ");
+    fgets(novo->autor, sizeof(novo->autor), stdin);
+    novo->autor[strcspn(novo->autor, "\n")] = '\0';
 
     aux = livrinhoDisp;
     if(aux == NULL || novo->codigoLivro < aux->codigoLivro) {
@@ -280,12 +281,12 @@ Cliente* insereClienteOrdenando(Cliente* clientinho, int valorCodigo, char nomeC
         return novo;
     }
     if(aux->codigo == valorCodigo) {
-    printf("O valor %d já existe na lista.\n", valorCodigo);
+        printf("O código %d já foi utilizado pelo cliente %s.\n", valorCodigo, aux->nome);
     return clientinho;
     }
     while (aux != NULL && aux->codigo < valorCodigo) {
         if((aux->prox !=NULL && aux->prox->codigo == valorCodigo) || aux->codigo == valorCodigo) {
-            printf("O valor %d já existe na lista.\n", valorCodigo);
+            printf("O código %d já foi utilizado.\n", valorCodigo);
             return clientinho;
         }
         ant = aux;
@@ -319,12 +320,12 @@ Cliente* DigitaClienteOrdenando(Cliente* clientinho) {
         return novo;
     }
     if (aux->codigo == valorCodigo) {
-        printf("O valor %d já existe na lista.\n", valorCodigo);
+        printf("O código %d já foi utilizado pelo cliente %s.\n", valorCodigo, aux->nome);
         return clientinho;
     }
     while (aux != NULL && aux->codigo < valorCodigo) {
-        if ((aux->prox != NULL && aux->prox->codigo == valorCodigo) || aux->codigo == valorCodigo) {
-            printf("O valor %d já existe na lista.\n", valorCodigo);
+       if ((aux->prox != NULL && aux->prox->codigo == valorCodigo) || aux->codigo == valorCodigo) {
+            printf("O código %d já foi utilizado.\n", valorCodigo);
             return clientinho;
         }
         ant = aux;
@@ -515,8 +516,13 @@ void emprestaLivro(LivroDisp** livrinhoDisp, LivroEmpres** livrinhoEmpres, Clien
     char nomeCliente[50];
     int codigoCliente = 0;
     int valorCodigo = -1;
-
-    printf("Digite o código do livro (ou -1 para buscar pelo nome): ");
+    
+    if(*livrinhoDisp == NULL) {
+        printf("Não há nenhum livro disponível para empréstimo\n");
+        return;
+    }
+    
+    printf("Digite o código do livro (ou -1 para buscar pelo nome): \n");
     scanf("%d", &valorCodigo);
     getchar();
 
@@ -526,7 +532,7 @@ void emprestaLivro(LivroDisp** livrinhoDisp, LivroEmpres** livrinhoEmpres, Clien
             aux = aux->prox;
         }
     } else {
-        printf("Digite o nome do livro para empréstimo: ");
+        printf("Digite o nome do livro para empréstimo: \n");
         fgets(nomeLivro, sizeof(nomeLivro), stdin);
         nomeLivro[strcspn(nomeLivro, "\n")] = '\0';
 
@@ -541,7 +547,7 @@ void emprestaLivro(LivroDisp** livrinhoDisp, LivroEmpres** livrinhoEmpres, Clien
         return;
     }
 
-    printf("Digite o código do cliente (ou -1 para buscar pelo nome): ");
+    printf("Digite o código do cliente (ou -1 para buscar pelo nome): \n");
     scanf("%d", &valorCodigo);
     getchar();
 
@@ -550,7 +556,7 @@ void emprestaLivro(LivroDisp** livrinhoDisp, LivroEmpres** livrinhoEmpres, Clien
             auxCliente = auxCliente->prox;
         }
     } else {
-        printf("Digite o nome do cliente para o empréstimo: ");
+        printf("Digite o nome do cliente para o empréstimo: \n");
         fgets(nomeCliente, sizeof(nomeCliente), stdin);
         nomeCliente[strcspn(nomeCliente, "\n")] = '\0';
 
@@ -576,35 +582,40 @@ void emprestaLivro(LivroDisp** livrinhoDisp, LivroEmpres** livrinhoEmpres, Clien
 }
 
 void devolveLivro(LivroDisp** livrinhoDisp, LivroEmpres** livrinhoEmpres, Cliente** clientinho) {
-    LivroEmpres *aux, *ant = NULL;
+    LivroEmpres *auxLivroEmpres, *antLivroEmpres = NULL;
     Cliente *auxCliente;
-    aux = *livrinhoEmpres;
+    auxLivroEmpres = *livrinhoEmpres;
     auxCliente = *clientinho;
     char nomeLivro[50];
     char nomeCliente[50];
     int valorCodigo = -1;
-
+    
+    if(*livrinhoEmpres == NULL) {
+        printf("Não há nenhum livro emprestado\n");
+        return;
+    }
+    
     printf("Digite o código do livro (ou -1 para buscar pelo nome): ");
     scanf("%d", &valorCodigo);
     getchar();
 
     if (valorCodigo != -1) {
-        while (aux != NULL && aux->codigoLivro != valorCodigo) {
-            ant = aux;
-            aux = aux->prox;
+        while (auxLivroEmpres != NULL && auxLivroEmpres->codigoLivro != valorCodigo) {
+            antLivroEmpres = auxLivroEmpres;
+            auxLivroEmpres = auxLivroEmpres->prox;
         }
     } else {
         printf("Digite o nome do livro para devolução: ");
         fgets(nomeLivro, sizeof(nomeLivro), stdin);
         nomeLivro[strcspn(nomeLivro, "\n")] = '\0';
 
-        while (aux != NULL && strcmp(nomeLivro, aux->nome) != 0) {
-            ant = aux;
-            aux = aux->prox;
+        while (auxLivroEmpres != NULL && strcmp(nomeLivro, auxLivroEmpres->nome) != 0) {
+            antLivroEmpres = auxLivroEmpres;
+            auxLivroEmpres = auxLivroEmpres->prox;
         }
     }
 
-    if(aux == NULL) {
+    if(auxLivroEmpres == NULL) {
         printf("O livro não foi encontrado para devolução.\n");
         return;
     }
@@ -632,11 +643,26 @@ void devolveLivro(LivroDisp** livrinhoDisp, LivroEmpres** livrinhoEmpres, Client
         return;
     }
 
-    *livrinhoDisp = insereLivroDispOrdenando(*livrinhoDisp, aux->codigoLivro, aux->nome, aux->assunto, aux->autor);
-    removeLivroCliente(*clientinho, aux->nome, auxCliente->nome);
-    removeLivroEmpres(livrinhoEmpres, aux->nome);
-}
+    LivroDisp *livroCliente = auxCliente->listaLivros;
+    int livroEncontrado = 0;
 
+    while (livroCliente != NULL) {
+        if (livroCliente->codigoLivro == auxLivroEmpres->codigoLivro && strcmp(livroCliente->nome, auxLivroEmpres->nome) == 0) {
+            livroEncontrado = 1;
+            break;
+        }
+        livroCliente = livroCliente->prox;
+    }
+
+    if (!livroEncontrado) {
+        printf("O livro não foi emprestado a este cliente.\n");
+        return;
+    }
+
+    *livrinhoDisp = insereLivroDispOrdenando(*livrinhoDisp, auxLivroEmpres->codigoLivro, auxLivroEmpres->nome, auxLivroEmpres->assunto, auxLivroEmpres->autor);
+    removeLivroCliente(*clientinho, auxLivroEmpres->nome, auxCliente->nome);
+    removeLivroEmpres(livrinhoEmpres, auxLivroEmpres->nome);
+}
 void menu(LivroDisp* livrinhoDisp, LivroEmpres* livrinhoEmpres, Cliente* clientinho) {
     while(1){
         int escolha = 0;
@@ -653,10 +679,10 @@ void menu(LivroDisp* livrinhoDisp, LivroEmpres* livrinhoEmpres, Cliente* clienti
         scanf("%d", &escolha);
 
         if(escolha == 1) {
-            DigitaLivroDispOrdenando(livrinhoDisp);
+            livrinhoDisp = DigitaLivroDispOrdenando(livrinhoDisp);
         }
         if(escolha == 2) {
-            DigitaClienteOrdenando(clientinho);
+            clientinho = DigitaClienteOrdenando(clientinho);
         }
         if(escolha == 3) {
             emprestaLivro(&livrinhoDisp, &livrinhoEmpres, &clientinho);
@@ -691,7 +717,6 @@ int main() {
     l = insereLivroDispOrdenando(l, 4, "A Revolução dos Bichos", "Fábula Política", "George Orwell");
     l = insereLivroDispOrdenando(l, 5, "O Pequeno Príncipe", "Fábula", "Antoine de Saint-Exupéry");
     l = insereLivroDispOrdenando(l, 6, "Dom Quixote", "Romance", "Miguel de Cervantes");
-    l = insereLivroDispOrdenando(l, 7, "Dom Quixote", "Romance", "Miguel de Cervantes");
     LivroEmpres *e;
     e = inicializaLivroEmpres();
     Cliente *c;
