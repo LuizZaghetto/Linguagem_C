@@ -7,8 +7,8 @@ Construa uma terceira fila (F3) que possua todos os elementos de F1 e F2, mas se
 números
 e. Determine a quantidade de nós que existem na árvore
 f. Retorne a quantidade de folhas de uma árvore
-g. Determine o nível de um certo nó, se ele exis;r na árvore
-h. Determine a quan;dade de descendentes de um certo nó, se ele existir na árvore 
+g. Determine o nível de um certo nó, se ele existir na árvore
+h. Determine a quantidade de descendentes de um certo nó, se ele existir na árvore 
 */
 
 #include <stdlib.h>
